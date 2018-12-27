@@ -40,13 +40,15 @@ export function getChartData(data, query) {
  *
  * @param {Array} data Data returned from Snuba
  * @param {Object} query Query state corresponding to data
+ * @param {Object} [options] Options object
+ * @param {Object} [options.fieldLabelMap] (default: false) Maps value from Snuba to a defined label
  * @returns {Array}
  */
-export function getChartDataByDay(rawData, query) {
+export function getChartDataByDay(rawData, query, options = {}) {
   // We only chart the first aggregation for now
   const aggregate = query.aggregations[0][2];
 
-  const data = getDataWithKeys(rawData, query);
+  const data = getDataWithKeys(rawData, query, options);
 
   // We only want to show the top 10 series
   const top10Series = getTopSeries(data, aggregate);
@@ -124,14 +126,14 @@ function getTopSeries(data, aggregate) {
   );
 }
 
-function getDataWithKeys(data, query) {
+function getDataWithKeys(data, query, options = {}) {
   const {aggregations, fields} = query;
   // We only chart the first aggregation for now
   const aggregate = aggregations[0][2];
 
   return data.map(row => {
     const key = fields.length
-      ? fields.map(field => getLabel(row[field])).join(',')
+      ? fields.map(field => getLabel(row[field], options)).join(',')
       : aggregate;
 
     return {
@@ -148,7 +150,7 @@ function formatDate(datetime) {
 // Converts a value to a string for the chart label. This could
 // potentially cause incorrect grouping, e.g. if the value null and string
 // 'null' are both present in the same series they will be merged into 1 value
-function getLabel(value) {
+function getLabel(value, options) {
   if (typeof value === 'object') {
     try {
       value = JSON.stringify(value);
@@ -156,6 +158,10 @@ function getLabel(value) {
       // eslint-disable-next-line no-console
       console.error(err);
     }
+  }
+
+  if (options.fieldLabelMap && options.fieldLabelMap.hasOwnProperty(value)) {
+    return options.fieldLabelMap[value];
   }
 
   return value;
