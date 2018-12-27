@@ -9,7 +9,7 @@ import {
 } from 'app/views/organizationDiscover/result/utils';
 
 describe('Utils', function() {
-  it('getChartData()', function() {
+  describe('getChartData()', function() {
     const raw = [
       {count: 2, uniq_id: 1, 'project.id': 5, environment: null},
       {count: 2, uniq_id: 3, 'project.id': 5, environment: 'staging'},
@@ -22,28 +22,55 @@ describe('Utils', function() {
       fields: ['project.id', 'environment'],
     };
 
-    const expected = [
-      {
-        seriesName: 'count',
-        data: [
-          {value: 2, name: 'project.id 5 environment null'},
-          {value: 2, name: 'project.id 5 environment staging'},
-          {value: 2, name: 'project.id 5 environment alpha'},
-          {value: 6, name: 'project.id 5 environment production'},
-        ],
-      },
-      {
-        seriesName: 'uniq_id',
-        data: [
-          {value: 1, name: 'project.id 5 environment null'},
-          {value: 3, name: 'project.id 5 environment staging'},
-          {value: 4, name: 'project.id 5 environment alpha'},
-          {value: 10, name: 'project.id 5 environment production'},
-        ],
-      },
-    ];
+    it('returns chart data', function() {
+      const expected = [
+        {
+          seriesName: 'count',
+          data: [
+            {value: 2, name: 'project.id 5 environment null'},
+            {value: 2, name: 'project.id 5 environment staging'},
+            {value: 2, name: 'project.id 5 environment alpha'},
+            {value: 6, name: 'project.id 5 environment production'},
+          ],
+        },
+        {
+          seriesName: 'uniq_id',
+          data: [
+            {value: 1, name: 'project.id 5 environment null'},
+            {value: 3, name: 'project.id 5 environment staging'},
+            {value: 4, name: 'project.id 5 environment alpha'},
+            {value: 10, name: 'project.id 5 environment production'},
+          ],
+        },
+      ];
 
-    expect(getChartData(raw, query)).toEqual(expected);
+      expect(getChartData(raw, query)).toEqual(expected);
+    });
+
+    it('returns chart data with percentages', function() {
+      const expected = [
+        {
+          seriesName: 'count',
+          data: [
+            {value: 2, percentage: 16.67, name: 'project.id 5 environment null'},
+            {value: 2, percentage: 16.67, name: 'project.id 5 environment staging'},
+            {value: 2, percentage: 16.67, name: 'project.id 5 environment alpha'},
+            {value: 6, percentage: 50, name: 'project.id 5 environment production'},
+          ],
+        },
+        {
+          seriesName: 'uniq_id',
+          data: [
+            {value: 1, percentage: 5.56, name: 'project.id 5 environment null'},
+            {value: 3, percentage: 16.67, name: 'project.id 5 environment staging'},
+            {value: 4, percentage: 22.22, name: 'project.id 5 environment alpha'},
+            {value: 10, percentage: 55.56, name: 'project.id 5 environment production'},
+          ],
+        },
+      ];
+
+      expect(getChartData(raw, query, {includePercentages: true})).toEqual(expected);
+    });
   });
 
   it('getChartDataByDay()', function() {
