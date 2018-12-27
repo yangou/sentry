@@ -40,9 +40,11 @@ export function getChartData(data, query) {
  *
  * @param {Array} data Data returned from Snuba
  * @param {Object} query Query state corresponding to data
+ * @param {Object} [options] Options object
+ * @param {Boolean} [options.useTimestamps] (default: false) Return raw timestamps instead of formatting dates
  * @returns {Array}
  */
-export function getChartDataByDay(rawData, query) {
+export function getChartDataByDay(rawData, query, options = {}) {
   // We only chart the first aggregation for now
   const aggregate = query.aggregations[0][2];
 
@@ -51,7 +53,9 @@ export function getChartDataByDay(rawData, query) {
   // We only want to show the top 10 series
   const top10Series = getTopSeries(data, aggregate);
 
-  const dates = [...new Set(rawData.map(entry => formatDate(entry.time)))];
+  const dates = [
+    ...new Set(rawData.map(entry => formatDate(entry.time, !options.useTimestamps))),
+  ];
 
   // Temporarily store series as object with series names as keys
   const seriesHash = getEmptySeriesHash(top10Series, dates);
@@ -60,7 +64,7 @@ export function getChartDataByDay(rawData, query) {
   data.forEach(row => {
     const key = row[CHART_KEY];
 
-    const dateIdx = dates.indexOf(formatDate(row.time));
+    const dateIdx = dates.indexOf(formatDate(row.time, !options.useTimestamps));
 
     if (top10Series.has(key)) {
       seriesHash[key][dateIdx].value = row[aggregate];
@@ -141,8 +145,14 @@ function getDataWithKeys(data, query) {
   });
 }
 
-function formatDate(datetime) {
-  return moment.utc(datetime * 1000).format('MMM Do');
+function formatDate(datetime, enabled = true) {
+  const timestamp = datetime * 1000;
+
+  if (!enabled) {
+    return timestamp;
+  }
+
+  return moment.utc(timestamp).format('MMM Do');
 }
 
 // Converts a value to a string for the chart label. This could
