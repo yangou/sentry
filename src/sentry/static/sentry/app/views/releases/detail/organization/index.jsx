@@ -1,7 +1,6 @@
 import DocumentTitle from 'react-document-title';
 import PropTypes from 'prop-types';
 import React from 'react';
-import styled from 'react-emotion';
 
 import SentryTypes from 'app/sentryTypes';
 import Feature from 'app/components/acl/feature';
@@ -10,7 +9,7 @@ import Alert from 'app/components/alert';
 import LoadingError from 'app/components/loadingError';
 import LoadingIndicator from 'app/components/loadingIndicator';
 import withOrganization from 'app/utils/withOrganization';
-import space from 'app/styles/space';
+import {PageContent} from 'app/styles/organization';
 
 import ReleaseHeader from '../shared/releaseHeader';
 import {getRelease} from '../shared/utils';
@@ -67,9 +66,9 @@ class OrganizationReleaseDetails extends React.Component {
 
   renderNoAccess() {
     return (
-      <Content>
+      <PageContent>
         <Alert type="warning">{t("You don't have access to this feature")}</Alert>
-      </Content>
+      </PageContent>
     );
   }
 
@@ -81,7 +80,7 @@ class OrganizationReleaseDetails extends React.Component {
     if (this.state.error) return <LoadingError onRetry={this.fetchData} />;
 
     return (
-      <Content>
+      <PageContent>
         <Feature
           features={['organizations:sentry10']}
           organization={this.props.organization}
@@ -93,7 +92,7 @@ class OrganizationReleaseDetails extends React.Component {
           environment: this.props.environment,
         })*/}
         </Feature>
-      </Content>
+      </PageContent>
     );
   }
 
@@ -103,13 +102,3 @@ class OrganizationReleaseDetails extends React.Component {
 }
 
 export default withOrganization(OrganizationReleaseDetails);
-
-// TODO: refactor as this same component is used in events, release list and user feedback
-const Content = styled('div')`
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-  overflow: hidden;
-  padding: ${space(2)} ${space(4)} ${space(3)};
-  margin-bottom: -20px; /* <footer> has margin-top: 20px; */
-`;
