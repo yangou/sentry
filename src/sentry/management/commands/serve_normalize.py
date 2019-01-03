@@ -56,6 +56,23 @@ def catch_errors(f):
     return wrapper
 
 
+from sentry import event_hashing
+
+
+def calculate_event_hashes(event):
+    # If a checksum is set, use that one.
+    checksum = event.data.get('checksum')
+    if checksum:
+        return ['checksum', checksum]
+
+    # Otherwise go with the new style fingerprint code
+    fingerprint = event.data.get('fingerprint') or ['{{ default }}']
+    return event_hashing.get_hashes_from_fingerprint_with_reason(event, fingerprint)
+
+
+event_hashing.calculate_event_hashes = calculate_event_hashes
+
+
 # Here's where the normalization itself happens
 def process_event(data, meta):
     from sentry.event_manager import EventManager
@@ -75,7 +92,7 @@ def process_event(data, meta):
     group_hash = None
 
     if not should_process(event):
-        group_hash = event_manager._get_event_instance(project_id=1).get_hashes()
+        group_hash = event_manager._get_event_instance(project_id="1").get_hashes()
     return {
         "event": dict(event),
         "group_hash": group_hash,
