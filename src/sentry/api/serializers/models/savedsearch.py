@@ -27,12 +27,17 @@ class SavedSearchSerializer(Serializer):
         return attrs
 
     def serialize(self, obj, attrs, user):
+        is_virtual = obj.id is None
         return {
-            'id': six.text_type(obj.id),
+            'id': six.text_type(obj.id) if not is_virtual else None,
+            'projectId': obj.project_id,
             'name': obj.name,
             'query': obj.query,
             'isDefault': obj.is_default,
             'isUserDefault': attrs['isUserDefault'],
-            'dateCreated': obj.date_added,
+            'dateCreated': obj.date_added if not is_virtual else None,
             'isPrivate': bool(obj.owner),
+            # Whether this is a virtual search that doesn't exist in the
+            # database. Used so Sentry can provide default searches.
+            'isVirtual': is_virtual,
         }
