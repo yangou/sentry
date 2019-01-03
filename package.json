@@ -136,6 +136,7 @@
       "<rootDir>/src/sentry/static/sentry"
     ],
     "setupFiles": [
+      "<rootDir>/tests/js/throw-on-react-error.js",
       "<rootDir>/tests/js/setup.js"
     ],
     "setupTestFrameworkScriptFile": "<rootDir>/tests/js/setupFramework.js",
